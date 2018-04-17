@@ -4,17 +4,20 @@ class FileOperator:
         self.input_file = input_file
         open(output_file, "w").close()
 
-    def split(self, splits):
-        # VALID SPLIT
-        data = []
-        f = open(self.input_file).read()
-        chunk = len(f) // splits
+    @staticmethod
+    def split_data(data, splits):
+        # VALID SPLIT, also it doesn't care about words
+        split = []
+        chunk = len(data) // splits
+        s = -1
         for s in range(splits - 1):
-            data.append(f[s * chunk: (s + 1) * chunk])
-        data.append(f[(s + 1) * chunk:])
-        return data
+            split.append(data[s * chunk: (s + 1) * chunk])
+        split.append(data[(s + 1) * chunk:])
+        return split
 
 
 if __name__ == "__main__":
-    a = FileOperator("shakespeare.txt", 213)
-    print(len(a.split(5)))
+    input_file = "shakespeare.txt"
+    a = FileOperator(input_file, 213)
+    data = open(input_file).read()
+    print(len(FileOperator.split_data(data, 5)))

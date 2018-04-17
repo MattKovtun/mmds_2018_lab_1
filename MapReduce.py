@@ -1,6 +1,7 @@
 from multiprocessing import Process
 from FileOperator import FileOperator
 from Node import Node
+from config import NUMBER_OF_NODES, FILE_EXTENSION
 
 
 class MapReduce:
@@ -15,52 +16,67 @@ class MapReduce:
         self.reducer = reducer
         return self
 
-    def run(self, n_workers):
-        self.data_split = self.file_operator.split(n_workers)
+    def set_shuffler(self, shuffler):
+        self.shuffler = shuffler
+        return self
 
-        workers = [Node(self.mapper) for i in range(n_workers)]
-        map_workers = []
+    def run(self, n_nodes):
+        data = open(self.file_operator.input_file).read()
+        data_split = FileOperator.split_data(data, n_nodes)
+
+        nodes = [Node(i, self.mapper, self.shuffler) for i in range(n_nodes)]
+        map_nodes = []
         tmp_data_storages = []
 
-        for thread_id in range(n_workers):
-            tmp_data_storage = str(thread_id) + ".txt"
+        for node in nodes:
+            tmp_data_storage = str(node.index) + FILE_EXTENSION
             tmp_data_storages.append(tmp_data_storage)
-            p = Process(target=workers[thread_id].apply, args=(self.data_split[thread_id], tmp_data_storage))
+            p = Process(target=nodes[node.index].apply, args=(data_split[node.index],))
             p.start()
-            map_workers.append(p)
-        [t.join() for t in map_workers]
+            map_nodes.append(p)
 
-        for worker in range(n_workers):
-            f_res = open(self.file_operator.output_file)
-            result = f_res.read()
-            f_res.close()
-            data = open(tmp_data_storages[worker]).read()
-            result = self.reducer(result, data)
+        for node in map_nodes:
+            node.join()
+
+        for node in nodes:
+            with open(self.file_operator.output_file) as f_res:
+                result = f_res.read()
+
+            with open(tmp_data_storages[node.index]) as data:
+                result = self.reducer(result, data.read())
+
             open(self.file_operator.output_file, "w").write(str(result))
 
         return self
 
+
 def mymap(data):
-    data = data.split()
-    words_any = 0  # counting word any
+    data = data.strip().split()
+    letters = 0
     for word in data:
-        if word.lower() == "any":
-            words_any += 1
-    return str(words_any)
+        letters += len(word)
+    return letters
 
 
 def myreduce(result, new_data):
     res = 0
-    if result: # check if output file is not empty
+    if result:  # check if output file is not empty
         res = int(result)
     new_data = int(new_data)
     return res + new_data
 
 
-if __name__ == "__main__":
-    NUMBER_OF_NODES = 10
-    f = FileOperator("shakespeare.txt", "res.txt")
+def myshuffle(node_storage):  # dict
+    res = 0
+    for k in node_storage:
+        res += node_storage[k]
+    return res
 
-    MapReduce(f).set_mapper(mymap)\
-        .set_reducer(myreduce)\
+
+if __name__ == "__main__":
+    f = FileOperator("test.txt", "res.txt")
+
+    MapReduce(f).set_mapper(mymap) \
+        .set_reducer(myreduce) \
+        .set_shuffler(myshuffle) \
         .run(NUMBER_OF_NODES)
