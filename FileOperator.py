@@ -4,6 +4,19 @@ class FileOperator:
         self.input_file = input_file
         open(output_file, "w").close()
 
+    def read_file(self):
+        """
+        Any file preprocessing if needed happens here
+        :return: list of words
+        """
+        data = []
+        if self.input_file.endswith(".csv"):
+            data = open(self.input_file).read().strip().split(",")
+        elif self.input_file.endswith(".txt"):
+            data = open(self.input_file).read().strip().split()
+
+        return data
+
     @staticmethod
     def split_data(data, splits):
         # VALID SPLIT, also it doesn't care about words
@@ -19,5 +32,5 @@ class FileOperator:
 if __name__ == "__main__":
     input_file = "shakespeare.txt"
     a = FileOperator(input_file, 213)
-    data = open(input_file).read()
-    print(len(FileOperator.split_data(data, 5)))
+    d = open(input_file).read()
+    print(len(FileOperator.split_data(d, 5)))

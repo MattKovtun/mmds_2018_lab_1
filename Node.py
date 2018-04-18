@@ -1,8 +1,7 @@
-import random
 from multiprocessing import Process, Manager
 from FileOperator import FileOperator
 from Worker import Worker
-from config import NUMBER_OF_WORKERS, FILE_EXTENSION
+from config import NUMBER_OF_WORKERS, OUTPUT_FILE_EXTENSION
 
 
 class Node:
@@ -34,5 +33,5 @@ class Node:
         node_storage = self.spawn_workers(data_split)
         result = self.shuffle_results(dict(node_storage))
 
-        with open(str(self.index) + FILE_EXTENSION, "w") as node_store:
+        with open(str(self.index) + OUTPUT_FILE_EXTENSION, "w") as node_store:
             node_store.write(str(result))
