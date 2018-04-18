@@ -1,4 +1,4 @@
-from multiprocessing import Process
+from multiprocessing import Process, Pool
 from FileOperator import FileOperator
 from Node import Node
 from config import NUMBER_OF_NODES, OUTPUT_FILE_EXTENSION

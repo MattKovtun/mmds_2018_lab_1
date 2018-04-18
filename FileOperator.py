@@ -34,3 +34,5 @@ if __name__ == "__main__":
     a = FileOperator(input_file, 213)
     d = open(input_file).read()
     print(len(FileOperator.split_data(d, 5)))
+
+

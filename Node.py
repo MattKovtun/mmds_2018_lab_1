@@ -1,4 +1,4 @@
-from multiprocessing import Process, Manager
+from multiprocessing import Manager, Pool
 from FileOperator import FileOperator
 from Worker import Worker
 from config import NUMBER_OF_WORKERS, OUTPUT_FILE_EXTENSION
@@ -14,15 +14,13 @@ class Node:
     def spawn_workers(self, data_split):
         manager = Manager()
         node_dict = manager.dict()
-        workers = []
+        workers = Pool()
 
         for worker in range(self.number_of_workers):
-            p = Process(target=Worker.perform, args=((data_split[worker], worker, self.map_fn, node_dict)))
-            p.start()
-            workers.append(p)
+            workers.apply_async(Worker.perform, args=((data_split[worker], worker, self.map_fn, node_dict)))
+        workers.close()
+        workers.join()
 
-        for worker in workers:
-            worker.join()
         return node_dict
 
     def shuffle_results(self, node_storage):
