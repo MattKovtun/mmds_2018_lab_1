@@ -97,7 +97,7 @@ def myshuffle(node_storage):
 
 
 if __name__ == "__main__":
-    f = FileOperator("test.txt", "res.txt")
+    f = FileOperator("100_words.txt", "res.txt")
 
     MapReduce(f).set_mapper(mymap) \
         .set_reducer(myreduce) \
